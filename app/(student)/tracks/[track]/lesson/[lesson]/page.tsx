@@ -13,6 +13,8 @@ import 'highlight.js/styles/atom-one-dark.css'
 import { runPython } from '@/lib/wasm/pyodide-runner'
 import { runCppCode } from '@/lib/wasm/cpp-runner'
 import { runViaHarness } from '@/lib/harness/client'
+import { saveProgressAttemptLocally } from '@/lib/offline/writes'
+import { runSync } from '@/lib/offline/sync'
 import type { RunResult } from '@/types/index'
 
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), { ssr: false })
@@ -50,6 +52,7 @@ export default function LessonPage() {
   const [isRunning, setIsRunning] = useState(false)
   const [completion, setCompletion] = useState<CompletionInfo | null>(null)
   const [alreadyCompleted, setAlreadyCompleted] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
     const supabase = createClient()
@@ -57,6 +60,7 @@ export default function LessonPage() {
     const loadLesson = async () => {
       try {
         const { data: userData } = await supabase.auth.getUser()
+        setUserId(userData.user?.id ?? null)
 
         const [{ data: lessonData, error: lessonError }, { data: trackData }, { data: progressData }] =
           await Promise.all([
@@ -124,6 +128,13 @@ export default function LessonPage() {
       setIsRunning(false)
     }
 
+    // Completion/XP require server-side grading (expected_output is checked
+    // there, not trusted from the client — see Phase 4's audit fix), so that
+    // can only happen through this direct call, not the offline queue below.
+    // Attempts/last_code fall back to a local-first save if this fails for
+    // any reason (offline, or a flaky connection despite appearing online) —
+    // never both, to avoid double-counting attempts.
+    let savedOnline = false
     try {
       const response = await fetch('/api/progress/update', {
         method: 'POST',
@@ -136,6 +147,7 @@ export default function LessonPage() {
         }),
       })
       if (response.ok) {
+        savedOnline = true
         const data = await response.json()
         if (data.passed) {
           setAlreadyCompleted(true)
@@ -145,7 +157,12 @@ export default function LessonPage() {
         }
       }
     } catch {
-      // Best-effort — a failed progress save shouldn't block the run output already shown.
+      // Network-level failure — fall through to the local-first save below.
+    }
+
+    if (!savedOnline && userId) {
+      await saveProgressAttemptLocally({ userId, lessonId, lastCode: code })
+      runSync().catch(() => {}) // best-effort — the periodic/focus/online triggers will retry regardless
     }
   }
 
