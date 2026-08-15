@@ -51,8 +51,14 @@ export function StudentTable({ students }: { students: StudentSummary[] }) {
       .eq('user_id', studentId)
       .order('created_at', { ascending: false })
 
+    const typedData = data as unknown as Array<{
+      completed: boolean
+      attempts: number
+      lessons: { title: string } | null
+    }> | null
+
     setHistory(
-      (data || []).map((row: any) => ({
+      (typedData || []).map((row) => ({
         lessonTitle: row.lessons?.title ?? 'Unknown lesson',
         completed: row.completed,
         attempts: row.attempts,

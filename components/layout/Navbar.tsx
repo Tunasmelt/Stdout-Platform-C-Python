@@ -3,10 +3,11 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 
-export const Navbar = ({ user }: { user?: any }) => {
+export const Navbar = ({ user }: { user?: User | null }) => {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 

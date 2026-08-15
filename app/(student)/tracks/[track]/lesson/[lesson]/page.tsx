@@ -12,6 +12,7 @@ import rehypeHighlight from 'rehype-highlight'
 import 'highlight.js/styles/atom-one-dark.css'
 import { runPython } from '@/lib/wasm/pyodide-runner'
 import { runCppCode } from '@/lib/wasm/cpp-runner'
+import { runViaHarness } from '@/lib/harness/client'
 import type { RunResult } from '@/types/index'
 
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), { ssr: false })
@@ -104,6 +105,11 @@ export default function LessonPage() {
     let result: RunResult
     try {
       result = language === 'python' ? await runPython(code) : await runCppCode(code, language)
+      if (result.unavailable) {
+        // WASM itself couldn't load/run — fall back to the harness, not for
+        // ordinary code errors, which the runner above already reports.
+        result = await runViaHarness(language, code)
+      }
       setOutput(result)
     } catch (err) {
       result = {

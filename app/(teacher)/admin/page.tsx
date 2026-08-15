@@ -50,7 +50,7 @@ export default function AdminPage() {
 
       {error && (
         <Card className="border-red-500 mb-6">
-          <p className="text-red-400">Couldn't load stats: {error}</p>
+          <p className="text-red-400">Couldn&apos;t load stats: {error}</p>
         </Card>
       )}
 
@@ -80,7 +80,7 @@ export default function AdminPage() {
           </CardHeader>
           <CardContent>
             <p className="text-[#8b949e] mb-6">
-              Create and edit lessons, organize chapters, and control what's published.
+              Create and edit lessons, organize chapters, and control what&apos;s published.
             </p>
             <Link href="/admin/lessons">
               <Button variant="primary" className="w-full">

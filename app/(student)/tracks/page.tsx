@@ -66,7 +66,7 @@ export default function TracksPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="font-syne text-4xl font-bold mb-2 text-[#e6edf3]">Choose a Track</h1>
-      <p className="text-[#8b949e] mb-12">Pick a language and we'll assess your level.</p>
+      <p className="text-[#8b949e] mb-12">Pick a language and we&apos;ll assess your level.</p>
 
       {tracks.length === 0 ? (
         <Card>

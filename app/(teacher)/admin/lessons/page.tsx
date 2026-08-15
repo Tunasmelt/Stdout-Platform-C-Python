@@ -40,7 +40,7 @@ export default function LessonsListPage() {
     if (fetchError) {
       setError(fetchError.message)
     } else {
-      setLessons((data as any) || [])
+      setLessons((data as unknown as LessonRow[]) || [])
     }
     setIsLoading(false)
   }

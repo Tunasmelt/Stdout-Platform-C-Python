@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
+import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 
 interface StudentProgress {
@@ -96,7 +96,7 @@ export default function DashboardPage() {
             setProgress(
               progressData.map((p) => ({
                 ...p,
-                lesson: p.lessons as any,
+                lesson: p.lessons as unknown as { title: string; chapter_id: string },
               }))
             )
           }
@@ -123,7 +123,7 @@ export default function DashboardPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-12">
         <h1 className="font-syne text-4xl font-bold mb-2 text-[#e6edf3]">Welcome back!</h1>
-        <p className="text-[#8b949e]">Here's your learning progress.</p>
+        <p className="text-[#8b949e]">Here&apos;s your learning progress.</p>
       </div>
 
       {/* Stats */}
@@ -162,7 +162,7 @@ export default function DashboardPage() {
           <Card>
             <CardContent className="pt-6">
               <p className="text-[#8b949e] mb-6">
-                You're learning {activeTrack.title}. Continue with your lessons or retake the
+                You&apos;re learning {activeTrack.title}. Continue with your lessons or retake the
                 assessment.
               </p>
               <div className="flex gap-4">
@@ -181,7 +181,7 @@ export default function DashboardPage() {
           <Card>
             <CardContent className="pt-6 text-center">
               <p className="text-[#8b949e] mb-6">
-                You haven't started a track yet. Choose one to get started!
+                You haven&apos;t started a track yet. Choose one to get started!
               </p>
               <Link href="/tracks">
                 <Button variant="primary">Pick a Track</Button>

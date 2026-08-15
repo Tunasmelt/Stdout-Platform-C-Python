@@ -8,14 +8,18 @@
  * - Or shipping a minimal WASI-based C compiler
  */
 
+interface CompilerModule {
+  ready: boolean
+}
+
 let compilerReady = false
-let compilerModule: any = null
+let compilerModule: CompilerModule | null = null
 
 /**
  * Load C/C++ compiler WASM binary
  */
-async function loadCompiler() {
-  if (compilerReady) return compilerModule
+async function loadCompiler(): Promise<CompilerModule> {
+  if (compilerReady && compilerModule) return compilerModule
 
   try {
     // Placeholder: In production, this would load a real WASM compiler
@@ -44,6 +48,7 @@ export async function runCppCode(
   compileError: string | null
   timedOut: boolean
   executionMs: number
+  unavailable?: boolean
 }> {
   const startTime = performance.now()
 
@@ -61,8 +66,9 @@ export async function runCppCode(
         (async () => ({
           stdout: '',
           stderr: '',
-          compileError: 'C/C++ execution is not available yet — the WASM compiler has not been integrated.',
+          compileError: `${language === 'cpp' ? 'C++' : 'C'} execution is not available yet — the WASM compiler has not been integrated.`,
           timedOut: false,
+          unavailable: true,
         }))(),
         timeoutPromise,
       ])

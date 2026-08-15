@@ -3,20 +3,28 @@
  * Lazy-loads Pyodide and runs Python code in a Web Worker
  */
 
+// pyodide ships no .d.ts — this covers only the methods actually used here,
+// not the full API surface.
+interface PyodideInstance {
+  setStdout(options: { batched: (msg: string) => void }): void
+  setStderr(options: { batched: (msg: string) => void }): void
+  runPythonAsync(code: string): Promise<unknown>
+}
+
 let pyodideReady = false
-let pyodideInstance: any = null
+let pyodideInstance: PyodideInstance | null = null
 
 /**
  * Initialize Pyodide (lazy load)
  */
-async function initPyodide() {
-  if (pyodideReady) return pyodideInstance
+async function initPyodide(): Promise<PyodideInstance> {
+  if (pyodideReady && pyodideInstance) return pyodideInstance
 
   try {
     const { loadPyodide } = await import('pyodide')
-    pyodideInstance = await loadPyodide({
+    pyodideInstance = (await loadPyodide({
       indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/',
-    })
+    })) as unknown as PyodideInstance
     pyodideReady = true
     return pyodideInstance
   } catch (err) {
@@ -37,14 +45,27 @@ export async function runPython(
   compileError: string | null
   timedOut: boolean
   executionMs: number
+  unavailable?: boolean
 }> {
   const startTime = performance.now()
   const output: string[] = []
   const errors: string[] = []
 
+  let pyodide: PyodideInstance
   try {
-    const pyodide = await initPyodide()
+    pyodide = await initPyodide()
+  } catch (err) {
+    return {
+      stdout: '',
+      stderr: err instanceof Error ? err.message : String(err),
+      compileError: err instanceof Error ? err.message : 'Unknown error',
+      timedOut: false,
+      executionMs: Math.round(performance.now() - startTime),
+      unavailable: true,
+    }
+  }
 
+  try {
     // Wire stdout/stderr capture — must be set per run since buffers are fresh each call
     pyodide.setStdout({ batched: (msg: string) => output.push(msg) })
     pyodide.setStderr({ batched: (msg: string) => errors.push(msg) })
