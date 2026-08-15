@@ -198,7 +198,7 @@ export default function AssessmentQuestionsPage() {
     if (fetchError) {
       setError(fetchError.message)
     } else {
-      setQuestions((data as any) || [])
+      setQuestions((data as unknown as QuestionRow[]) || [])
     }
     setIsLoading(false)
   }
@@ -241,7 +241,7 @@ export default function AssessmentQuestionsPage() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="font-syne text-3xl font-bold text-[#e6edf3] mb-2">Assessment Questions</h1>
       <p className="text-[#8b949e] mb-8">
-        Each track's assessment needs at least 2 beginner + 2 intermediate + 1 advanced question.
+        Each track&apos;s assessment needs at least 2 beginner + 2 intermediate + 1 advanced question.
       </p>
 
       <div className="flex gap-2 mb-6">

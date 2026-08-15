@@ -1,7 +1,6 @@
 'use client'
 
 import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
 import type { AssessmentLevel } from '@/types/index'
 
 interface LevelPickerProps {
@@ -43,7 +42,7 @@ export const LevelPicker: React.FC<LevelPickerProps> = ({
     <div className="space-y-8">
       <div className="text-center">
         <h2 className="font-syne text-3xl font-bold mb-2 text-[#e6edf3]">
-          What's your experience level?
+          What&apos;s your experience level?
         </h2>
         <p className="text-[#8b949e]">
           This helps us place you at the right starting point.
@@ -70,7 +69,7 @@ export const LevelPicker: React.FC<LevelPickerProps> = ({
       </div>
 
       <p className="text-center text-[#8b949e] text-sm">
-        Don't worry — you can retake this later from your dashboard.
+        Don&apos;t worry — you can retake this later from your dashboard.
       </p>
     </div>
   )

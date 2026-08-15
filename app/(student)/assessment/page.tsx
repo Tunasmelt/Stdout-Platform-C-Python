@@ -225,8 +225,8 @@ export default function AssessmentPage() {
               Great work!
             </h2>
             <p className="text-[#8b949e] mb-6">
-              We've placed you at <span className="text-[#f78166] font-bold">{result?.level}</span>
-              . You'll start with{' '}
+              We&apos;ve placed you at <span className="text-[#f78166] font-bold">{result?.level}</span>
+              . You&apos;ll start with{' '}
               <span className="text-[#f78166] font-bold">{result?.lesson?.title}</span>.
             </p>
             <Button

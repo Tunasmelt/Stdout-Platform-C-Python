@@ -95,7 +95,7 @@ export default function LoginPage() {
 
       <CardFooter>
         <span className="text-[#8b949e] text-sm">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/signup" className="text-[#f78166] hover:underline">
             Sign up
           </Link>

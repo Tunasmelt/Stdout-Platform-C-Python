@@ -9,7 +9,7 @@ export default function NotFound() {
         <div className="text-5xl mb-4">🧭</div>
         <h1 className="font-syne text-3xl font-bold text-[#e6edf3] mb-2">Page not found</h1>
         <p className="text-[#8b949e] mb-6">
-          That page doesn't exist, or it moved somewhere we haven't linked yet.
+          That page doesn&apos;t exist, or it moved somewhere we haven&apos;t linked yet.
         </p>
         <Link href="/">
           <Button variant="primary">Back Home</Button>

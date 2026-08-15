@@ -95,6 +95,9 @@ export interface RunResult {
   compileError: string | null
   timedOut: boolean
   executionMs: number
+  // True when the WASM runtime itself couldn't load/run (distinct from the
+  // student's code failing) — signals the caller to try the harness fallback.
+  unavailable?: boolean
 }
 
 // Assessment placement result

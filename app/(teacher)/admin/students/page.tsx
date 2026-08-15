@@ -68,7 +68,13 @@ export default function StudentsPage() {
 
         const statsByUser = new Map((statsData || []).map((s) => [s.user_id, s]))
         const resultsByUser = new Map<string, Array<{ trackTitle: string; placedLevel: string }>>()
-        for (const r of (resultsData as any[]) || []) {
+        const typedResults = resultsData as unknown as Array<{
+          user_id: string
+          placed_level: string
+          tracks: { title: string } | null
+        }> | null
+
+        for (const r of typedResults || []) {
           const list = resultsByUser.get(r.user_id) || []
           list.push({ trackTitle: r.tracks?.title ?? '—', placedLevel: r.placed_level })
           resultsByUser.set(r.user_id, list)
