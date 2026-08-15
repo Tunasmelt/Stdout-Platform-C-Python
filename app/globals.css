@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-bg: #0d1117;
+    --color-surface: #161b22;
+    --color-border: #30363d;
+    --color-accent: #f78166;
+    --color-success: #3fb950;
+    --color-text-primary: #e6edf3;
+    --color-text-muted: #8b949e;
+  }
+
+  * {
+    @apply border-[--color-border];
+  }
+
+  body {
+    @apply bg-[--color-bg] text-[--color-text-primary];
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-syne font-bold;
+  }
+
+  p, span, a, div {
+    @apply font-ibm-plex-sans;
+  }
+
+  code, pre {
+    @apply font-jetbrains-mono;
+  }
+
+  input, textarea, select {
+    @apply font-ibm-plex-sans;
+  }
+}
+
+@layer components {
+  .container-center {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .text-accent {
+    @apply text-[--color-accent];
+  }
+
+  .text-muted {
+    @apply text-[--color-text-muted];
+  }
+
+  .bg-surface {
+    @apply bg-[--color-surface];
+  }
+
+  .border-subtle {
+    @apply border border-[--color-border];
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection color */
+::selection {
+  @apply bg-[--color-accent] text-[--color-bg];
+}
+
+/* Lesson completion banner */
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-pop-in {
+  animation: pop-in 0.35s ease-out;
+}

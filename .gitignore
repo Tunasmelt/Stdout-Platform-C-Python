@@ -1,0 +1,64 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Testing
+coverage
+
+# Next.js
+.next
+out
+build
+dist
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Project specific
+public/wasm/*.wasm
+
+# Node
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Claude Code / agent workflow — internal planning docs for the AI-assisted
+# build process, not part of the shipped app. Kept locally, not committed.
+.agent/
+CLAUDE.md
+ARCHITECTURE.md
+MASTER_PROMPT.md
+PHASE_PROMPTS.md
+SESSION_PHASE1.md
+HANDOFF.md
+HANDOFF_TEMPLATE.md
+auth.md
+database.md
+assessment.md
+wasm.md
+harness.md
+offline-sync.md
+bootstrap.sh
+
+# Design mockups (static reference HTML, not wired into the Next.js app) —
+# root-level only; do not match components/ui/, which is real app code
+/ui/
