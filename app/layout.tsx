@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Syne, IBM_Plex_Sans, JetBrains_Mono } from 'next/font/google'
+import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration'
 import './globals.css'
 
 const syne = Syne({
@@ -55,6 +56,7 @@ export default function RootLayout({
       className={`${syne.variable} ${ibmPlexSans.variable} ${jetbrainsMono.variable}`}
     >
       <body className="bg-[#0d1117] text-[#e6edf3] antialiased">
+        <ServiceWorkerRegistration />
         {children}
       </body>
     </html>

@@ -6,15 +6,30 @@ import { useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
+import { useOfflineStore } from '@/stores/offlineStore'
+import { useOfflineSync } from '@/lib/offline/useOfflineSync'
+import { clearCachedSession } from '@/lib/offline/session'
 
 export const Navbar = ({ user }: { user?: User | null }) => {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const isOnline = useOfflineStore((s) => s.isOnline)
+  const pendingSyncCount = useOfflineStore((s) => s.pendingSyncCount)
+
+  useOfflineSync(!!user)
 
   const handleLogout = async () => {
     setIsLoading(true)
-    const supabase = createClient()
-    await supabase.auth.signOut()
+    // Clear the local session immediately regardless of network — a stale
+    // server-side session isn't security-critical here (offline-sync.md), so
+    // logout must not hang waiting on a sign-out call that can't complete offline.
+    await clearCachedSession()
+    try {
+      const supabase = createClient()
+      await supabase.auth.signOut()
+    } catch {
+      // Best-effort — already logged out locally.
+    }
     router.push('/')
   }
 
@@ -27,6 +42,12 @@ export const Navbar = ({ user }: { user?: User | null }) => {
           </Link>
 
           <div className="flex gap-2 sm:gap-4 items-center min-w-0">
+            {user && !isOnline && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#2d1b00] border border-[#9e6a03] rounded-full text-xs text-[#e3b341]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#e3b341]" />
+                Offline{pendingSyncCount > 0 ? ` · ${pendingSyncCount} pending` : ''}
+              </span>
+            )}
             {user ? (
               <>
                 <span className="hidden sm:inline text-[#8b949e] text-sm truncate max-w-[12rem]">
