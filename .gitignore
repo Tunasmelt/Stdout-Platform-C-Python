@@ -58,6 +58,9 @@ assessment.md
 wasm.md
 harness.md
 offline-sync.md
+lessons.md
+teacher.md
+ui.md
 bootstrap.sh
 
 # Design mockups (static reference HTML, not wired into the Next.js app) —
