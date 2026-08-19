@@ -38,7 +38,7 @@ export const Navbar = ({ user }: { user?: User | null }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex justify-between items-center">
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl font-bold font-syne text-[#f78166]">CodeLearn</span>
+            <span className="text-2xl font-bold font-syne text-[#f78166]">Stdout</span>
           </Link>
 
           <div className="flex gap-2 sm:gap-4 items-center min-w-0">

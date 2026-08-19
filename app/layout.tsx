@@ -26,21 +26,21 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'CodeLearn — Learn to Code',
-    template: '%s — CodeLearn',
+    default: 'Stdout — Learn to Code',
+    template: '%s — Stdout',
   },
   description: 'Master C, C++, and Python through interactive, scaffolded lessons.',
   keywords: ['learn to code', 'C', 'C++', 'Python', 'programming courses', 'interactive coding'],
   openGraph: {
-    title: 'CodeLearn — Learn to Code',
+    title: 'Stdout — Learn to Code',
     description: 'Master C, C++, and Python through interactive, scaffolded lessons.',
     url: siteUrl,
-    siteName: 'CodeLearn',
+    siteName: 'Stdout',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'CodeLearn — Learn to Code',
+    title: 'Stdout — Learn to Code',
     description: 'Master C, C++, and Python through interactive, scaffolded lessons.',
   },
 }

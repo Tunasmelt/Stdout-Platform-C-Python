@@ -22,7 +22,7 @@ export default async function HomePage() {
               <span className="text-[#f78166]">Master</span> C, C++, and Python.
             </h1>
             <p className="font-ibm-plex-sans text-lg sm:text-xl text-[#8b949e] mb-8 max-w-2xl mx-auto">
-              CodeLearn is an interactive, scaffolded programming platform inspired by freeCodeCamp.
+              Stdout is an interactive, scaffolded programming platform inspired by freeCodeCamp.
               Pick a language, complete a skill assessment, and start learning from your level.
             </p>
             <div className="flex gap-4 justify-center">
