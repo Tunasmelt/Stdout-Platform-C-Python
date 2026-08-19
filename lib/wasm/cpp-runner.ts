@@ -15,6 +15,17 @@
  * stays a real dependency purely for type-checking (`import type` below is
  * erased at compile time, so it never reaches the bundle) and so the pinned
  * version here has something to stay in sync with.
+ *
+ * Live-verified in a real browser (see HANDOFF.md for the full test):
+ * `language: 'c'` genuinely compiles and runs, correct stdout confirmed,
+ * ~10-30s including first-time clang download. Compile errors are reported
+ * correctly and fast (~300ms). `language: 'cpp'` does NOT complete within
+ * 240+ seconds — #include <iostream> alone times out. This isn't a timeout
+ * value to tune: no student would wait 4+ minutes for a compile. The 10s
+ * default below already fails C++ safely (a clean "Execution timeout"
+ * result, not a hang), so nothing here is broken — but C++ should be
+ * treated as unavailable/unshippable via this toolchain until the
+ * underlying libc++ linking issue is understood, not just "slow."
  */
 
 import type * as WasmerSdk from '@wasmer/sdk'
