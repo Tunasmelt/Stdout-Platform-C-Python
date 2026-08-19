@@ -44,7 +44,7 @@ export default function LessonPage() {
   const lessonId = params.lesson as string
 
   const [lesson, setLesson] = useState<Lesson | null>(null)
-  const [language, setLanguage] = useState<LessonLanguage>('cpp')
+  const [language, setLanguage] = useState<LessonLanguage>('c')
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [code, setCode] = useState('')
@@ -88,7 +88,13 @@ export default function LessonPage() {
 
         setLesson(lessonData)
         setCode(lessonData.starter_code || '')
-        setLanguage(trackData?.slug === 'python' ? 'python' : 'cpp')
+        // The schema has no per-lesson language field, so the whole c-cpp
+        // track shares one execution language. Defaults to 'c', not 'cpp' —
+        // live-tested (see cpp-runner.ts's header comment / HANDOFF.md): C
+        // compiles and runs correctly in ~10-30s, C++ does not complete
+        // within 240+ seconds via this toolchain. 'cpp' here would make
+        // every lesson in this track fail every time.
+        setLanguage(trackData?.slug === 'python' ? 'python' : 'c')
         setAlreadyCompleted(!!progressData?.completed)
       } catch (err) {
         console.error('Error loading lesson:', err)
@@ -270,7 +276,7 @@ export default function LessonPage() {
         <div className="flex-1 min-h-[300px]">
           <MonacoEditor
             height="100%"
-            language={language === 'python' ? 'python' : 'cpp'}
+            language={language}
             theme="vs-dark"
             value={code}
             onChange={(value) => setCode(value ?? '')}
