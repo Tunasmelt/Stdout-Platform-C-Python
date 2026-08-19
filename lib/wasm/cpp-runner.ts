@@ -1,38 +1,60 @@
 /**
  * C/C++ WASM Runner
- * Uses an Emscripten-compiled WASM compiler to run C/C++ code
- * 
- * Note: This is a stub. Full implementation requires:
- * - A pre-built WASM compiler (clang/LLVM compiled to WASM)
- * - Or using a service like Compiler Explorer API (with caution)
- * - Or shipping a minimal WASI-based C compiler
+ *
+ * Uses @wasmer/sdk to run clang entirely in-browser, compile the student's
+ * code to a WASI .wasm binary, then run that binary via the same SDK.
+ * Requires the page to be cross-origin isolated (COOP/COEP — see
+ * next.config.js's headers() for the lesson route) because the SDK uses
+ * SharedArrayBuffer internally even for single-threaded programs.
+ *
+ * The SDK is loaded from jsdelivr via a webpackIgnore'd dynamic import, not
+ * the npm-installed copy — its wasm-bindgen-generated bundle uses
+ * `import.meta` in a way Next.js's production Terser pass can't parse
+ * (a known issue with wasm-bindgen output in webpack; Wasmer's own official
+ * browser example loads it from a CDN for the same reason). The npm package
+ * stays a real dependency purely for type-checking (`import type` below is
+ * erased at compile time, so it never reaches the bundle) and so the pinned
+ * version here has something to stay in sync with.
  */
 
-interface CompilerModule {
-  ready: boolean
+import type * as WasmerSdk from '@wasmer/sdk'
+import type { Wasmer } from '@wasmer/sdk'
+
+const SDK_VERSION = '0.10.0'
+const SDK_URL = `https://cdn.jsdelivr.net/npm/@wasmer/sdk@${SDK_VERSION}/dist/index.mjs`
+
+// A variable (not literal) module specifier resolves to `any` for TypeScript
+// no matter what — there's no way to point it at the CDN URL's types — so
+// this cast recovers real types from the npm package's own .d.ts instead of
+// letting everything downstream silently widen to `any`.
+async function loadSdk(): Promise<typeof WasmerSdk> {
+  return (await import(/* webpackIgnore: true */ SDK_URL)) as typeof WasmerSdk
 }
 
-let compilerReady = false
-let compilerModule: CompilerModule | null = null
+let sdkReady = false
+let clangPackage: Wasmer | null = null
 
-/**
- * Load C/C++ compiler WASM binary
- */
-async function loadCompiler(): Promise<CompilerModule> {
-  if (compilerReady && compilerModule) return compilerModule
+async function loadClang(): Promise<Wasmer> {
+  if (clangPackage) return clangPackage
 
-  try {
-    // Placeholder: In production, this would load a real WASM compiler
-    // For MVP, we'll use a simple approach that returns mock results
-    // TODO: Integrate with wasm-clang or similar
+  const { init, Wasmer: WasmerClass } = await loadSdk()
 
-    compilerReady = true
-    compilerModule = { ready: true }
-    return compilerModule
-  } catch (err) {
-    console.error('Failed to load C/C++ compiler:', err)
-    throw new Error('Could not load C/C++ compiler')
+  if (!sdkReady) {
+    await init()
+    sdkReady = true
   }
+
+  clangPackage = await WasmerClass.fromRegistry('clang/clang')
+  return clangPackage
+}
+
+interface CppRunResult {
+  stdout: string
+  stderr: string
+  compileError: string | null
+  timedOut: boolean
+  executionMs: number
+  unavailable?: boolean
 }
 
 /**
@@ -42,60 +64,90 @@ export async function runCppCode(
   code: string,
   language: 'c' | 'cpp' = 'c',
   timeoutMs: number = 10000
-): Promise<{
-  stdout: string
-  stderr: string
-  compileError: string | null
-  timedOut: boolean
-  executionMs: number
-  unavailable?: boolean
-}> {
+): Promise<CppRunResult> {
   const startTime = performance.now()
 
+  let clang: Wasmer
   try {
-    await loadCompiler()
-
-    // Create a timeout promise
-    const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('Execution timeout')), timeoutMs)
-    )
-
-    try {
-      // TODO: Call actual WASM compiler here — no Emscripten binary is wired in yet.
-      const result = await Promise.race([
-        (async () => ({
-          stdout: '',
-          stderr: '',
-          compileError: `${language === 'cpp' ? 'C++' : 'C'} execution is not available yet — the WASM compiler has not been integrated.`,
-          timedOut: false,
-          unavailable: true,
-        }))(),
-        timeoutPromise,
-      ])
-
-      const executionMs = Math.round(performance.now() - startTime)
-      return { ...result, executionMs }
-    } catch (err) {
-      if (err instanceof Error && err.message === 'Execution timeout') {
-        return {
-          stdout: '',
-          stderr: '',
-          compileError: 'Execution timeout (10s limit exceeded)',
-          timedOut: true,
-          executionMs: timeoutMs,
-        }
-      }
-      throw err
-    }
+    clang = await loadClang()
   } catch (err) {
-    console.error('C/C++ execution error:', err)
-    const executionMs = Math.round(performance.now() - startTime)
+    return {
+      stdout: '',
+      stderr: err instanceof Error ? err.message : String(err),
+      compileError: err instanceof Error ? err.message : 'Could not load the C/C++ compiler',
+      timedOut: false,
+      executionMs: Math.round(performance.now() - startTime),
+      unavailable: true,
+    }
+  }
+
+  const timeoutPromise = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('Execution timeout')), timeoutMs)
+  )
+
+  const runPromise = (async (): Promise<Omit<CppRunResult, 'executionMs'>> => {
+    const { Wasmer: WasmerClass, Directory } = await loadSdk()
+
+    if (!clang.entrypoint) {
+      throw new Error('The C/C++ compiler package has no entrypoint')
+    }
+
+    const sourceFile = language === 'cpp' ? 'main.cpp' : 'main.c'
+    const project = new Directory()
+    await project.writeFile(sourceFile, code)
+
+    const compileInstance = await clang.entrypoint.run({
+      args: [`/project/${sourceFile}`, '-o', '/project/main.wasm'],
+      mount: { '/project': project },
+    })
+    const compileOutput = await compileInstance.wait()
+
+    if (!compileOutput.ok) {
+      return {
+        stdout: '',
+        stderr: compileOutput.stderr,
+        compileError: compileOutput.stderr || `clang exited with code ${compileOutput.code}`,
+        timedOut: false,
+      }
+    }
+
+    const wasmBytes = await project.readFile('main.wasm')
+    const program = await WasmerClass.fromFile(wasmBytes)
+
+    if (!program.entrypoint) {
+      throw new Error('The compiled program has no entrypoint')
+    }
+
+    const runInstance = await program.entrypoint.run()
+    const runOutput = await runInstance.wait()
+
+    return {
+      stdout: runOutput.stdout,
+      stderr: runOutput.stderr,
+      compileError: runOutput.ok ? null : runOutput.stderr || `Program exited with code ${runOutput.code}`,
+      timedOut: false,
+    }
+  })()
+
+  try {
+    const result = await Promise.race([runPromise, timeoutPromise])
+    return { ...result, executionMs: Math.round(performance.now() - startTime) }
+  } catch (err) {
+    if (err instanceof Error && err.message === 'Execution timeout') {
+      return {
+        stdout: '',
+        stderr: '',
+        compileError: 'Execution timeout (10s limit exceeded)',
+        timedOut: true,
+        executionMs: timeoutMs,
+      }
+    }
     return {
       stdout: '',
       stderr: err instanceof Error ? err.message : String(err),
       compileError: err instanceof Error ? err.message : 'Unknown error',
       timedOut: false,
-      executionMs,
+      executionMs: Math.round(performance.now() - startTime),
     }
   }
 }
