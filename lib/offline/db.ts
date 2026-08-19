@@ -53,7 +53,7 @@ class OfflineDatabase extends Dexie {
   syncQueue!: Table<SyncQueueItem, number>
 
   constructor() {
-    super('codelearn-offline')
+    super('stdout-offline')
 
     // Dexie schema versioning follows the same append-only discipline as
     // Supabase migrations (CLAUDE.md) — never edit this version's stores,

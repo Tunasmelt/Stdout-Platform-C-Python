@@ -1,4 +1,4 @@
-// CodeLearn service worker — app-shell + visited-lesson + WASM asset caching.
+// Stdout service worker — app-shell + visited-lesson + WASM asset caching.
 //
 // Hand-rolled (no next-pwa) to avoid adding a dependency that needs approval
 // per CLAUDE.md's package rule; offline-sync.md explicitly offers a plain
@@ -9,8 +9,8 @@
 // that's a separate, still-open decision (CLAUDE.md) involving icons/
 // branding this file has no business deciding on its own.
 
-const CACHE_NAME = 'codelearn-v1'
-const PYODIDE_CACHE_NAME = 'codelearn-pyodide-v1'
+const CACHE_NAME = 'stdout-v1'
+const PYODIDE_CACHE_NAME = 'stdout-pyodide-v1'
 const PYODIDE_HOSTS = ['cdn.jsdelivr.net']
 
 self.addEventListener('install', () => {

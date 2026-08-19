@@ -1,5 +1,5 @@
 // =============================================================================
-// CodeLearn — Shared TypeScript Types
+// Stdout — Shared TypeScript Types
 // Keep in sync with Supabase schema
 // =============================================================================
 
